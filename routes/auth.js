@@ -1,40 +1,49 @@
 const express = require('express');
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { User } = require('../models/users');
 const router = express.Router();
 
 /* Inscription */
-router.post('/register', function (req, res, next) {
+router.post('/register', async function (req, res, next) {
     const errors = []
 
+    // Chercher si un user avec le login login existe dans la db
+    const user = await User.findOne({ login: req.body.login }).exec()
+
     // Validation
-    if (req.db.users.find(user => user.login === req.body.login) !== undefined)
+
+    if (req.body.login === undefined || req.body.login.length === 0)
+        errors.push('Vous devez indiquer un login')
+    else if (user !== null)
         errors.push('Ce login est déjà utilisé')
 
-    if (req.body.login === null || req.body.login.length === 0)
-        errors.push('Vous devez indiquer un login')
 
-    if (req.body.password === null || req.body.password.length === 0)
+    if (req.body.password === undefined || req.body.password.length === 0)
         errors.push('Vous devez indiquer un mot de passe')
 
     if (errors.length > 0)
         res.jsonResponse('Formulaire invalide', null, errors, 422)
     else {
         // Traitement
-        const newUser = {
+        const newUser = new User({
             login: req.body.login,
             password: req.hash(req.body.password),
-            id: req.db.users.length + 1,
             wins: 0,
-            looses: 0
-        }
+            looses: 0,
+        })
 
         // Sauvegarde en base de données
-        req.db.users.push(newUser)
-        console.log('Création d\'un user')
-        // console.log(req.body, newUser, users)
+        newUser.save()
+            .then(() => {
+                console.log('Création d\'un user')
+                res.jsonResponse('Inscription réussie', null, null, 201)
+            })
+            .catch(err => {
+                console.error(err)
 
-        res.jsonResponse('Inscription réussie', null, null, 201)
+                res.jsonResponse('Erreur', null, null, 400)
+            })
     }
 });
 
@@ -47,7 +56,7 @@ router.post('/login', function (req, res, next) {
         user.login === req.body.login &&
         bcrypt.compareSync(req.body.password, user.password))
 
-        // Si les identifiants sont mauvais on répond une erreur
+    // Si les identifiants sont mauvais on répond une erreur
     if (user === undefined) {
         res.jsonResponse('Echec de la connexion', null, null, 400)
     } else {

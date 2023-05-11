@@ -24,31 +24,35 @@ app.use(cookieParser());
 /**
  * Base de données temporaire
  */
-var users = [
-    {
-        id: 1, // Number
-        login: 'Leroy', // String,
-        password: hash("Mot de passe"), // String
-        wins: 0, // Number
-        looses: 0, // Number
-    }
-]
 
-var sessions = [
-    { // Exemple du format de la donnée
-        user_id: 1, // Number
-        jwt_token: "jwt", // String
-        user_agent: "Postman", // String
-        created_at: "21-03-2222" // DateTime
-    }
-]
+// Plus nescéssaire avec mongodb
+// var users = [
+//     {
+//         id: 1, // Number
+//         login: 'Leroy', // String,
+//         password: hash("Mot de passe"), // String
+//         wins: 0, // Number
+//         looses: 0, // Number
+//     }
+// ]
+
+// var sessions = [
+//     { // Exemple du format de la donnée
+//         user_id: 1, // Number
+//         jwt_token: "jwt", // String
+//         user_agent: "Postman", // String
+//         created_at: "21-03-2222" // DateTime
+//     }
+// ]
+
 
 // Ajout de fonctions et/ou données dans la request et la réponse des requêtes
 app.use((req, res, next) => {
-    req.db = {
-        users: users,
-        sessions: sessions
-    }
+
+    // req.db = {
+    //     // users: users,
+    //     sessions: sessions
+    // }
 
     req.hash = hash
 
